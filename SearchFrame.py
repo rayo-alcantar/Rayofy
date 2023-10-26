@@ -28,7 +28,7 @@ class SearchFrame(wx.Frame):
     
         # Realizar la búsqueda en Spotify (solo canciones)
         try:
-            results = self.playlist_manager.sp.search(q=search_query, limit=10, type='track')
+            results = self.playlist_manager.sp.search(q=search_query, limit=30, type='track')
             tracks = results['tracks']['items']
             
             if not tracks:
