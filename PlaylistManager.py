@@ -1,0 +1,133 @@
+﻿# Importar biblioteca para el portapapeles
+import pyperclip
+
+class PlaylistManager:
+    def __init__(self, spotify_instance):
+        self.sp = spotify_instance
+        self.playlists = []
+        self.status_message = ""
+
+    def update_status(self, message):
+        """ Actualiza el estado de la operación """
+        self.status_message = message
+
+    def fetch_playlists(self):
+        """ Obtiene todas las playlists del usuario """
+        try:
+            results = self.sp.current_user_playlists()
+            if results:
+                self.playlists = results.get('items', [])
+                self.extend_playlists(results)
+            else:
+                self.update_status("No se pudieron obtener las playlists.")
+        except Exception as e:
+            self.update_status(f"Error al obtener playlists: {e}")
+
+    def extend_playlists(self, results):
+        """ Extiende la lista de playlists si hay más páginas """
+        while results['next']:
+            results = self.sp.next(results)
+            self.playlists.extend(results.get('items', []))
+
+    def get_playlist(self, index):
+        """ Obtiene una playlist específica por su índice en la lista """
+        try:
+            return self.playlists[index]
+        except IndexError:
+            self.update_status("Índice de playlist fuera de rango.")
+            return None
+
+    def rename_playlist(self, playlist_id, new_name):
+        """ Renombra una playlist """
+        try:
+            self.sp.playlist_change_details(playlist_id, name=new_name)
+            self.update_status("Playlist renombrada con éxito.")
+        except Exception as e:
+            self.update_status(f"Error al renombrar playlist: {e}")
+
+    def delete_playlist(self, playlist_id):
+        """ Elimina una playlist """
+        try:
+            self.sp.playlist_unfollow(playlist_id)
+        except Exception as e:
+            self.update_status(f"Error al eliminar playlist: {e}")
+    
+    def fetch_tracks_from_playlist(self, playlist_id):
+        tracks = []
+        results = self.sp.playlist_tracks(playlist_id)
+        for item in results['items']:
+            track = item['track']
+            tracks.append(track['name'])
+        print("Fetched tracks:", tracks)
+        return tracks
+    
+    def copy_playlist_link(self, playlist_id):
+        """ Copia el enlace de la playlist al portapapeles """
+        try:
+            playlist_url = f"https://open.spotify.com/playlist/{playlist_id}"
+            pyperclip.copy(playlist_url)
+            self.update_status("Enlace de playlist copiado al portapapeles.")
+        except Exception as e:
+            self.update_status(f"Error al copiar enlace al portapapeles: {e}")
+    def delete_song_from_playlist(self, playlist_name, song_name):
+        # Buscar la playlist por su nombre para obtener su ID
+        playlist_id = None
+        for playlist in self.playlists:
+            if playlist['name'] == playlist_name:
+                playlist_id = playlist['id']
+                break
+    
+        if not playlist_id:
+            self.update_status(f"Playlist {playlist_name} no encontrada.")
+            return
+        
+        # Buscar la canción por su nombre para obtener su ID
+        song_id = None
+        results = self.sp.playlist_tracks(playlist_id)
+        for item in results['items']:
+            if item['track']['name'] == song_name:
+                song_id = item['track']['id']
+                break
+        
+        if not song_id:
+            self.update_status(f"Canción {song_name} no encontrada en la playlist.")
+            return
+        
+        # Eliminar la canción de la playlist
+        try:
+            self.sp.playlist_remove_all_occurrences_of_items(playlist_id, [song_id])
+            self.update_status(f"La canción {song_name} ha sido eliminada de la playlist {playlist_name}.")
+        except Exception as e:
+            self.update_status(f"Error al eliminar la canción de la playlist: {e}")
+    
+    def copy_song_link(self, playlist_name, song_name):
+        # Buscar la playlist por su nombre para obtener su ID
+        playlist_id = None
+        for playlist in self.playlists:
+            if playlist['name'] == playlist_name:
+                playlist_id = playlist['id']
+                break
+    
+        if not playlist_id:
+            self.update_status(f"Playlist {playlist_name} no encontrada.")
+            return
+        
+        # Buscar la canción por su nombre para obtener su ID
+        song_id = None
+        results = self.sp.playlist_tracks(playlist_id)
+        for item in results['items']:
+            if item['track']['name'] == song_name:
+                song_id = item['track']['id']
+                break
+        
+        if not song_id:
+            self.update_status(f"Canción {song_name} no encontrada en la playlist.")
+            return
+        
+        # Copiar el enlace de la canción al portapapeles
+        try:
+            song_url = f"https://open.spotify.com/track/{song_id}"
+            pyperclip.copy(song_url)
+            self.update_status(f"El enlace de la canción {song_name} ha sido copiado al portapapeles.")
+        except Exception as e:
+            self.update_status(f"Error al copiar el enlace de la canción al portapapeles: {e}")
