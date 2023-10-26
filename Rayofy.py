@@ -35,7 +35,7 @@ class Rayofy(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_create_playlist, create_playlist_item)
         
         # Añadir el menú a la barra de menús
-        menu_bar.Append(file_menu, '&Archivo')
+        menu_bar.Append(file_menu, '&Acciones')
         
         # Establecer la barra de menús para la ventana
         self.SetMenuBar(menu_bar)
