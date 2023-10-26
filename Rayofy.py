@@ -87,7 +87,7 @@ class Rayofy(wx.Frame):
             if not playlist_name:
                 wx.MessageBox('El nombre de la playlist no puede estar vacío.', 'Error', wx.OK | wx.ICON_ERROR)
                 return
-            if len(playlist_name) > 50:  # Suponiendo que 50 caracteres es el máximo permitido
+            if len(playlist_name) > 99:  # Suponiendo que 100 caracteres es el máximo permitido
                 wx.MessageBox('El nombre de la playlist es demasiado largo.', 'Error', wx.OK | wx.ICON_ERROR)
                 return
             
@@ -95,6 +95,14 @@ class Rayofy(wx.Frame):
             try:
                 self.playlist_manager.create_new_playlist(playlist_name)
                 wx.MessageBox(f'Playlist {playlist_name} creada exitosamente.', 'Éxito', wx.OK | wx.ICON_INFORMATION)
+                # Actualizar la lista de playlists
+                self.playlist_manager.fetch_playlists()
+                
+                # Borrar y volver a construir el árbol
+                self.tree.DeleteChildren(self.tree.GetRootItem())
+                for i, playlist in enumerate(self.playlist_manager.playlists):
+                    playlist_item = self.tree.AppendItem(self.tree.GetRootItem(), playlist['name'])
+                    self.tree.AppendItem(playlist_item, "Cargando...")
             except Exception as e:
                 wx.MessageBox(f'Error al crear la playlist: {e}', 'Error', wx.OK | wx.ICON_ERROR)
         
