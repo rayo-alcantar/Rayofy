@@ -6,6 +6,7 @@ sys.path.append('.')
 try:
     from SpotifyAuthenticator import SpotifyAuthenticator
     from PlaylistManager import PlaylistManager
+    from SearchFrame import SearchFrame
 except ImportError as e:
     print("Error de importación:", e)
 
@@ -63,8 +64,9 @@ class Rayofy(wx.Frame):
 
     def on_search_button_click(self, event):
         # Crea una nueva instancia de SearchFrame y la muestra
-        search_frame = SearchFrame(None, "Ventana de Búsqueda")
-
+        search_frame = SearchFrame(self.playlist_manager)
+        search_frame.Show()
+    
     def copy_playlist_link(self, event):
         item = self.tree.GetSelection()
         if item:
