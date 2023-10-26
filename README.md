@@ -25,6 +25,13 @@ pip install spotipy
 2. Haz clic en 'Create an App'.
 3. Llena la información requerida.
 4. Una vez creada la app, obtendrás tu `CLIENT_ID` y `CLIENT_SECRET`.
+5. Dichos datos deberás ingresarlo en un archivo .json, algo así:
+```bash
+{
+    "CLIENT_ID": "ClientID",
+    "CLIENT_SECRET": "Client_Secret"
+}
+
 
 ## Funciones
 
