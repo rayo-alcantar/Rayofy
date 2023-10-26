@@ -1,9 +1,6 @@
-﻿# Ignorar todos los archivos JSON
-*.json
-
-# Ignorar la carpeta __pycache__ y todos los archivos .pyc dentro de ella
-__pycache__/
+﻿__pycache__/
 *.pyc
-
-# Ignorar todos los archivos Python (descomenta la siguiente línea si realmente quieres hacer esto)
-# *.py
+*.pyo
+.git/
+*.song
+*.son
