@@ -131,3 +131,27 @@ class PlaylistManager:
             self.update_status(f"El enlace de la canción {song_name} ha sido copiado al portapapeles.")
         except Exception as e:
             self.update_status(f"Error al copiar el enlace de la canción al portapapeles: {e}")
+    def create_new_playlist(self, playlist_name):
+        """ Crea una nueva playlist """
+        if not playlist_name:
+            self.update_status("El nombre de la playlist no puede estar vacío.")
+            return False
+    
+        if len(playlist_name) > 100:  # Suponiendo que 100 caracteres es el máximo permitido por Spotify
+            self.update_status("El nombre de la playlist es demasiado largo.")
+            return False
+    
+        # Validación para evitar nombres duplicados
+        existing_names = [playlist['name'] for playlist in self.playlists]
+        if playlist_name in existing_names:
+            self.update_status("Ya existe una playlist con ese nombre.")
+            return False
+    
+        try:
+            user = self.sp.current_user()
+            self.sp.user_playlist_create(user['id'], playlist_name)
+            self.update_status(f"Playlist {playlist_name} creada con éxito.")
+            return True
+        except Exception as e:
+            self.update_status(f"Error al crear la playlist: {e}")
+            return False

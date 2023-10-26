@@ -24,7 +24,21 @@ class Rayofy(wx.Frame):
         # Crear un panel y un sizer vertical
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
-
+        # Crear un objeto wx.MenuBar
+        menu_bar = wx.MenuBar()
+        
+        # Crear un objeto wx.Menu
+        file_menu = wx.Menu()
+        
+        # Añadir un elemento de menú para "Crear Playlist"
+        create_playlist_item = file_menu.Append(wx.ID_ANY, 'Crear Playlist', 'Crear una nueva Playlist')
+        self.Bind(wx.EVT_MENU, self.on_create_playlist, create_playlist_item)
+        
+        # Añadir el menú a la barra de menús
+        menu_bar.Append(file_menu, '&Archivo')
+        
+        # Establecer la barra de menús para la ventana
+        self.SetMenuBar(menu_bar)
         # Crear el árbol de playlists
         self.tree = wx.TreeCtrl(panel, style=wx.TR_DEFAULT_STYLE | wx.TR_FULL_ROW_HIGHLIGHT)
         root = self.tree.AddRoot('Playlists')
@@ -61,7 +75,32 @@ class Rayofy(wx.Frame):
         vbox.Add(close_button, proportion=0, flag=wx.ALIGN_CENTER)
 
         panel.SetSizer(vbox)
-
+    def on_create_playlist(self, event):
+        # Crear un nuevo cuadro de diálogo
+        dlg = wx.TextEntryDialog(self, 'Ingrese el nombre de la nueva playlist:', 'Crear Playlist')
+        
+        # Mostrar el cuadro de diálogo y esperar la respuesta del usuario
+        if dlg.ShowModal() == wx.ID_OK:
+            playlist_name = dlg.GetValue().strip()  # Obtener el valor del cuadro de texto y eliminar espacios en blanco
+            
+            # Validación básica
+            if not playlist_name:
+                wx.MessageBox('El nombre de la playlist no puede estar vacío.', 'Error', wx.OK | wx.ICON_ERROR)
+                return
+            if len(playlist_name) > 50:  # Suponiendo que 50 caracteres es el máximo permitido
+                wx.MessageBox('El nombre de la playlist es demasiado largo.', 'Error', wx.OK | wx.ICON_ERROR)
+                return
+            
+            # Llamar al método para crear una nueva playlist desde la clase PlaylistManager
+            try:
+                self.playlist_manager.create_new_playlist(playlist_name)
+                wx.MessageBox(f'Playlist {playlist_name} creada exitosamente.', 'Éxito', wx.OK | wx.ICON_INFORMATION)
+            except Exception as e:
+                wx.MessageBox(f'Error al crear la playlist: {e}', 'Error', wx.OK | wx.ICON_ERROR)
+        
+        # Destruir el cuadro de diálogo para liberar recursos
+        dlg.Destroy()
+    
     def on_search_button_click(self, event):
         # Crea una nueva instancia de SearchFrame y la muestra
         search_frame = SearchFrame(self.playlist_manager)
