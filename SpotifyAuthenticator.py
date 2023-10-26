@@ -6,9 +6,22 @@ import os
 import json
 import webbrowser
 
+# Cargar CLIENT_ID y CLIENT_SECRET desde un archivo JSON
+try:
+    with open('credentials.json', 'r') as f:
+        credentials = json.load(f)
+        CLIENT_ID = credentials.get('CLIENT_ID')
+        CLIENT_SECRET = credentials.get('CLIENT_SECRET')
+        
+        if not CLIENT_ID or not CLIENT_SECRET:
+            print("CLIENT_ID o CLIENT_SECRET no se encuentran en el archivo JSON.")
+except FileNotFoundError:
+    print("El archivo credentials.json no se encuentra.")
+except json.JSONDecodeError:
+    print("Error al decodificar el archivo JSON. Asegúrate de que el archivo tenga el formato correcto.")
+except Exception as e:
+    print(f"Ocurrió un error inesperado: {e}")
 # Definición de constantes
-CLIENT_ID = "d87d6478aa924ffb9f8ae0219e6eef21"
-CLIENT_SECRET = "d802e4b077574021a403393543c5499a"
 REDIRECT_URI = "http://localhost/"
 SCOPE = "playlist-modify-public playlist-modify-private"
 SESSION_FILE = "user_session.json"
