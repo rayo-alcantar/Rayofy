@@ -41,22 +41,29 @@ class Rayofy(wx.Frame):
         
         # Botones   
         delete_button = wx.Button(panel, label='Eliminar Playlist')
+        search_button = wx.Button(panel, label='Buscar')  
         close_button = wx.Button(panel, label='Cerrar')
         copy_link_button = wx.Button(panel, label='Copiar enlace al portapapeles')
         self.tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_tree_item_right_click)
 
         # Vincular eventos a botones
         delete_button.Bind(wx.EVT_BUTTON, self.delete_playlist)
+        search_button.Bind(wx.EVT_BUTTON, self.on_search_button_click)
         close_button.Bind(wx.EVT_BUTTON, self.close_app)
         copy_link_button.Bind(wx.EVT_BUTTON, self.copy_playlist_link)  # Evento vinculado
 
         # Añadir elementos al sizer
         vbox.Add(self.tree, proportion=1, flag=wx.EXPAND)
         vbox.Add(delete_button, proportion=0, flag=wx.ALIGN_CENTER)
+        vbox.Add(search_button, proportion=0, flag=wx.ALIGN_CENTER)
         vbox.Add(copy_link_button, proportion=0, flag=wx.ALIGN_CENTER)
         vbox.Add(close_button, proportion=0, flag=wx.ALIGN_CENTER)
 
         panel.SetSizer(vbox)
+
+    def on_search_button_click(self, event):
+        # Crea una nueva instancia de SearchFrame y la muestra
+        search_frame = SearchFrame(None, "Ventana de Búsqueda")
 
     def copy_playlist_link(self, event):
         item = self.tree.GetSelection()
