@@ -36,27 +36,30 @@ class SearchFrame(wx.Frame):
                 self.Close()
                 return
     
-            # Mostrar los resultados en un menú para que el usuario pueda elegir una canción
-            track_names = [track['name'] for track in tracks]
-            dialog = wx.SingleChoiceDialog(self, 'Elige una canción para añadir a una playlist:', 'Resultados de búsqueda', track_names)
-    
-            if dialog.ShowModal() == wx.ID_OK:
-                selected_track = tracks[dialog.GetSelection()]
-    
-                # Mostrar otro menú para seleccionar la playlist a la que se desea añadir la canción
-                self.playlist_manager.fetch_playlists()
-                playlist_names = [playlist['name'] for playlist in self.playlist_manager.playlists]
-                dialog = wx.SingleChoiceDialog(self, 'Elige una playlist para añadir la canción:', 'Elige una playlist', playlist_names)
-    
-                if dialog.ShowModal() == wx.ID_OK:
-                    selected_playlist = self.playlist_manager.playlists[dialog.GetSelection()]
-                    # Añadir la canción a la playlist
-                    self.playlist_manager.sp.playlist_add_items(selected_playlist['id'], [selected_track['uri']])
-                    
-                dialog.Destroy()
+            while True:  # Iniciar un bucle para mantener los diálogos abiertos
+                track_names = [track['name'] for track in tracks]
+                dialog = wx.SingleChoiceDialog(self, 'Elige una canción para añadir a una playlist:', 'Resultados de búsqueda', track_names)
             
-            dialog.Destroy()
-    
+                if dialog.ShowModal() == wx.ID_OK:
+                    selected_track = tracks[dialog.GetSelection()]
+            
+                    # Mostrar otro menú para seleccionar la playlist a la que se desea añadir la canción
+                    self.playlist_manager.fetch_playlists()
+                    playlist_names = [playlist['name'] for playlist in self.playlist_manager.playlists]
+                    playlist_dialog = wx.SingleChoiceDialog(self, 'Elige una playlist para añadir la canción:', 'Elige una playlist', playlist_names)
+            
+                    if playlist_dialog.ShowModal() == wx.ID_OK:
+                        selected_playlist = self.playlist_manager.playlists[playlist_dialog.GetSelection()]
+                        self.playlist_manager.sp.playlist_add_items(selected_playlist['id'], [selected_track['uri']])
+                    playlist_dialog.Destroy()  # Destruir el diálogo después de su uso
+            
+                dialog.Destroy()  # Destruir el diálogo después de su uso
+            
+                # Pregunta al usuario si quiere continuar añadiendo más canciones
+                continue_dialog = wx.MessageDialog(self, '¿Quieres añadir más canciones?', 'Continuar', wx.YES_NO)
+                if continue_dialog.ShowModal() == wx.ID_NO:
+                    break  # Romper el bucle si el usuario selecciona 'No'
+                continue_dialog.Destroy()  # Destruir el diálogo después de su uso
             # Limpiar el cuadro de texto de búsqueda
             self.search_text.SetValue("")
     

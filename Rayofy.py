@@ -8,7 +8,7 @@ try:
     from PlaylistManager import PlaylistManager
     from SearchFrame import SearchFrame
 except ImportError as e:
-    print("Error de importación:", e)
+    print("error en la importación")
 
 class Rayofy(wx.Frame):
     def __init__(self, spotify_authenticator, playlist_manager):
@@ -81,14 +81,14 @@ class Rayofy(wx.Frame):
                     self.playlist_manager.copy_playlist_link(playlist_id)
 
     def on_tree_item_expanding(self, event):
-        print("funciona?")
+        #print("funciona?")
         
         item = event.GetItem()
         parent = self.tree.GetItemParent(item)
         if parent == self.tree.GetRootItem():
             playlist_name = self.tree.GetItemText(item)
             playlist_id = None
-            print("Appending tracks to tree...")
+            #print("Appending tracks to tree...")
             for playlist in self.playlist_manager.playlists:
                 if playlist['name'] == playlist_name:
                     playlist_id = playlist['id']
@@ -133,7 +133,7 @@ class Rayofy(wx.Frame):
             else:
                 wx.MessageBox('Por favor, selecciona una playlist contraída para eliminar.', 'Atención', wx.OK | wx.ICON_INFORMATION)
     def on_tree_item_right_click(self, event):
-        print("Sí, hace click")
+        #print("Sí, hace click")
         item = event.GetItem()
         parent = self.tree.GetItemParent(item)
         
