@@ -55,10 +55,10 @@ class Rayofy(wx.Frame):
 
         
         # Botones   
-        delete_button = wx.Button(panel, label='Eliminar Playlist')
-        search_button = wx.Button(panel, label='Buscar')  
-        close_button = wx.Button(panel, label='Cerrar')
-        copy_link_button = wx.Button(panel, label='Copiar enlace al portapapeles')
+        delete_button = wx.Button(panel, label='&Eliminar Playlist')
+        search_button = wx.Button(panel, label='&Buscar')  
+        close_button = wx.Button(panel, label='&Salir')
+        copy_link_button = wx.Button(panel, label='&Copiar enlace al portapapeles')
         self.tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_tree_item_right_click)
 
         # Vincular eventos a botones
