@@ -57,9 +57,17 @@ class PlaylistManager:
         results = self.sp.playlist_tracks(playlist_id)
         for item in results['items']:
             track = item['track']
-            tracks.append(track['name'])
-        print("Fetched tracks:", tracks)
+            # Guardar nombre y artista principal
+            artist = track['artists'][0]['name'] if track['artists'] else 'Desconocido'
+            tracks.append(f"{track['name']} - {artist}")
         return tracks
+
+    def get_track_count(self, playlist_id):
+        try:
+            results = self.sp.playlist_tracks(playlist_id)
+            return results['total']
+        except Exception:
+            return 0
     
     def copy_playlist_link(self, playlist_id):
         """ Copia el enlace de la playlist al portapapeles """

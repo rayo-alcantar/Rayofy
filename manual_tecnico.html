@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Manual Técnico - Rayofy</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; background: #f9f9f9; }
+        h1, h2 { color: #2c3e50; }
+        code, pre { background: #eee; padding: 2px 4px; border-radius: 3px; }
+        .section { margin-bottom: 2em; }
+    </style>
+</head>
+<body>
+    <h1>Manual Técnico - Rayofy</h1>
+    <div class="section">
+        <h2>1. Descripción General</h2>
+        <p>Rayofy es una aplicación de escritorio desarrollada en Python con wxPython y Spotipy para gestionar playlists de Spotify. Permite buscar, añadir, eliminar y editar playlists y canciones de forma accesible y eficiente.</p>
+    </div>
+    <div class="section">
+        <h2>2. Estructura del Proyecto</h2>
+        <ul>
+            <li><b>Rayofy.py</b>: Ventana principal y lógica de la interfaz.</li>
+            <li><b>PlaylistManager.py</b>: Lógica de gestión de playlists y canciones.</li>
+            <li><b>SearchFrame.py</b>: Ventana para buscar y añadir canciones.</li>
+            <li><b>SpotifyAuthenticator.py</b>: Autenticación con la API de Spotify.</li>
+            <li><b>credentials.json</b>: Credenciales de la API de Spotify.</li>
+        </ul>
+    </div>
+    <div class="section">
+        <h2>3. Instalación y Configuración</h2>
+        <ol>
+            <li>Instala dependencias:
+                <pre>pip install wxPython spotipy pyperclip</pre>
+            </li>
+            <li>Crea <code>credentials.json</code> con tus credenciales de Spotify.</li>
+        </ol>
+    </div>
+    <div class="section">
+        <h2>4. Uso de la Aplicación</h2>
+        <ul>
+            <li>Ejecuta <code>Rayofy.py</code>.</li>
+            <li>Navega con el teclado. Usa la tecla de aplicaciones para menús contextuales.</li>
+            <li>Pulsa F5 para refrescar playlists.</li>
+            <li>Usa <b>&Buscar</b> para buscar canciones.</li>
+        </ul>
+    </div>
+    <div class="section">
+        <h2>5. Accesibilidad y Usabilidad</h2>
+        <ul>
+            <li>Todos los controles tienen atajos de teclado y tooltips.</li>
+            <li>El árbol de playlists muestra el número de canciones.</li>
+            <li>Confirmación al eliminar elementos.</li>
+        </ul>
+    </div>
+    <div class="section">
+        <h2>6. Contacto</h2>
+        <p>Para soporte: <a href="mailto:rayoalcantar@gmail.com">rayoalcantar@gmail.com</a></p>
+    </div>
+</body>
+</html>
