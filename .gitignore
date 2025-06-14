@@ -4,3 +4,5 @@
 .git/
 *.song
 *.son
+credentials.json
+user_session.json
