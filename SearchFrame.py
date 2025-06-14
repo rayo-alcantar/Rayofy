@@ -37,7 +37,8 @@ class SearchFrame(wx.Frame):
                 return
     
             while True:  # Iniciar un bucle para mantener los diálogos abiertos
-                track_names = [track['name'] for track in tracks]
+                # Mostrar nombre de canción y artista
+                track_names = [f"{track['name']} - {track['artists'][0]['name']}" for track in tracks]
                 dialog = wx.SingleChoiceDialog(self, 'Elige una canción para añadir a una playlist:', 'Resultados de búsqueda', track_names)
             
                 if dialog.ShowModal() == wx.ID_OK:

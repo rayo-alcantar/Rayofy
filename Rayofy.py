@@ -46,12 +46,13 @@ class Rayofy(wx.Frame):
         # Poblar el árbol con playlists
         self.playlist_manager.fetch_playlists()
         for i, playlist in enumerate(self.playlist_manager.playlists):
-            
             playlist_item = self.tree.AppendItem(root, playlist['name'])
             self.tree.AppendItem(playlist_item, "Cargando...")
         # Vincular el evento de expansión del árbol
         self.tree.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.on_tree_item_expanding)
         self.tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_tree_item_right_click)
+        # Nuevo: Vincular evento de teclado para menú contextual
+        self.tree.Bind(wx.EVT_KEY_DOWN, self.on_tree_key_down)
 
         
         # Botones   
@@ -186,31 +187,31 @@ class Rayofy(wx.Frame):
         
         if parent != self.tree.GetRootItem():  # Este es un nodo de una canción
             self.show_song_options(item)
+    def on_tree_key_down(self, event):
+        key = event.GetKeyCode()
+        if key == 395:  # Tecla de aplicaciones
+            item = self.tree.GetSelection()
+            parent = self.tree.GetItemParent(item)
+            if parent != self.tree.GetRootItem():
+                self.show_song_options(item)
+        else:
+            event.Skip()
     def show_song_options(self, item):
         song_name = self.tree.GetItemText(item)
         parent_item = self.tree.GetItemParent(item)
         playlist_name = self.tree.GetItemText(parent_item)
-        
-        dlg = wx.MessageDialog(
-            self,
-            f'¿Qué quieres hacer con la canción {song_name}?',
-            'Opciones de la canción',
-            wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_QUESTION
-        )
-        
-        dlg.SetYesNoLabels('Eliminar de playlist', 'Copiar enlace')
-        
-        result = dlg.ShowModal()
-        
-        if result == wx.ID_YES:
+        # Menú contextual en vez de MessageDialog
+        menu = wx.Menu()
+        eliminar = menu.Append(wx.ID_ANY, 'Eliminar de playlist')
+        copiar = menu.Append(wx.ID_ANY, 'Copiar enlace')
+        def on_eliminar(evt):
             self.playlist_manager.delete_song_from_playlist(playlist_name, song_name)
-        elif result == wx.ID_NO:
+        def on_copiar(evt):
             self.playlist_manager.copy_song_link(playlist_name, song_name)
-        elif result == wx.ID_CANCEL:
-            # Cancelar
-            pass
-        
-        dlg.Destroy()
+        self.Bind(wx.EVT_MENU, on_eliminar, eliminar)
+        self.Bind(wx.EVT_MENU, on_copiar, copiar)
+        self.PopupMenu(menu)
+        menu.Destroy()
     def close_app(self, event):
         self.Close()
 
