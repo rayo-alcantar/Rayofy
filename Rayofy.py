@@ -203,13 +203,15 @@ class Rayofy(wx.Frame):
     def show_song_options(self, item):
         song_name = self.tree.GetItemText(item)
         parent_item = self.tree.GetItemParent(item)
-        playlist_name = self.tree.GetItemText(parent_item)
-        # Menú contextual en vez de MessageDialog
+        playlist_label = self.tree.GetItemText(parent_item)
+        playlist_name = playlist_label.rsplit(' (', 1)[0]
         menu = wx.Menu()
         eliminar = menu.Append(wx.ID_ANY, 'Eliminar de playlist')
         copiar = menu.Append(wx.ID_ANY, 'Copiar enlace')
         def on_eliminar(evt):
-            self.playlist_manager.delete_song_from_playlist(playlist_name, song_name)
+            ok = self.playlist_manager.delete_song_from_playlist(playlist_name, song_name)
+            if ok:
+                self.refresh_playlists()
         def on_copiar(evt):
             self.playlist_manager.copy_song_link(playlist_name, song_name)
         self.Bind(wx.EVT_MENU, on_eliminar, eliminar)
@@ -217,7 +219,8 @@ class Rayofy(wx.Frame):
         self.PopupMenu(menu)
         menu.Destroy()
     def show_playlist_options(self, item):
-        playlist_name = self.tree.GetItemText(item)
+        playlist_label = self.tree.GetItemText(item)
+        playlist_name = playlist_label.rsplit(' (', 1)[0]
         menu = wx.Menu()
         editar = menu.Append(wx.ID_ANY, 'Editar nombre')
         eliminar = menu.Append(wx.ID_ANY, 'Eliminar playlist')
@@ -226,20 +229,21 @@ class Rayofy(wx.Frame):
             dlg = wx.TextEntryDialog(self, 'Nuevo nombre de la playlist:', 'Editar nombre', playlist_name)
             if dlg.ShowModal() == wx.ID_OK:
                 nuevo_nombre = dlg.GetValue().strip()
-                if nuevo_nombre:
-                    for playlist in self.playlist_manager.playlists:
-                        if playlist['name'] == playlist_name:
-                            self.playlist_manager.rename_playlist(playlist['id'], nuevo_nombre)
+                for playlist in self.playlist_manager.playlists:
+                    if playlist['name'] == playlist_name:
+                        ok = self.playlist_manager.rename_playlist(playlist['id'], nuevo_nombre)
+                        if ok:
                             self.refresh_playlists()
-                            break
+                        break
             dlg.Destroy()
         def on_eliminar(evt):
             dlg = wx.MessageDialog(self, f'¿Seguro que quieres eliminar la playlist "{playlist_name}"?', 'Confirmar eliminación', wx.YES_NO | wx.ICON_WARNING)
             if dlg.ShowModal() == wx.ID_YES:
                 for playlist in self.playlist_manager.playlists:
                     if playlist['name'] == playlist_name:
-                        self.playlist_manager.delete_playlist(playlist['id'])
-                        self.refresh_playlists()
+                        ok = self.playlist_manager.delete_playlist(playlist['id'])
+                        if ok:
+                            self.refresh_playlists()
                         break
             dlg.Destroy()
         def on_copiar(evt):
