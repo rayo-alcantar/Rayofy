@@ -64,7 +64,7 @@ class Rayofy(wx.Frame):
 
         
         # Botón "Buscar"
-        search_button = wx.Button(panel, label="Buscar")
+        search_button = wx.Button(panel, label="&Buscar")
         search_button.Bind(wx.EVT_BUTTON, self.on_search_button_click)
         vbox.Add(search_button, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=10)
 
