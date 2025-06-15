@@ -36,7 +36,7 @@ class Rayofy(wx.Frame):
         file_menu = wx.Menu()
         
         # Añadir un elemento de menú para "Crear Playlist"
-        create_playlist_item = file_menu.Append(wx.ID_ANY, 'Crear Playlist', 'Crear una nueva Playlist')
+        create_playlist_item = file_menu.Append(wx.ID_ANY, '&Crear Playlist	Ctrl+N', 'Crear una nueva Playlist')
         self.Bind(wx.EVT_MENU, self.on_create_playlist, create_playlist_item)
         
         # Añadir el menú a la barra de menús
@@ -69,6 +69,9 @@ class Rayofy(wx.Frame):
         vbox.Add(search_button, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=10)
 
         panel.SetSizer(vbox)
+        # Atajo de teclado Ctrl+N para crear playlist
+        accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('N'), create_playlist_item.GetId())])
+        self.SetAcceleratorTable(accel_tbl)
     def on_create_playlist(self, event):
         # Crear un nuevo cuadro de diálogo
         dlg = wx.TextEntryDialog(self, 'Ingrese el nombre de la nueva playlist:', 'Crear Playlist')

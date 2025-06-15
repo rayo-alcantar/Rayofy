@@ -16,7 +16,7 @@ class SearchFrame(wx.Frame):
         vbox.Add(self.search_text, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
         # Botón "Buscar"
-        search_button = wx.Button(panel, id=wx.ID_ANY, label="&Buscar")
+        search_button = wx.Button(panel, label="&Buscar")
         search_button.SetToolTip("Buscar canción (Alt+B)")
         search_button.Bind(wx.EVT_BUTTON, self.on_search_button_click)
         vbox.Add(search_button, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=10)
