@@ -61,17 +61,31 @@ class PlaylistManager:
 
     def fetch_tracks_from_playlist(self, playlist_id):
         tracks = []
-        results = self.sp.playlist_tracks(playlist_id)
-        for item in results['items']:
-            track = item['track']
-            # Guardar nombre y artista principal
-            artist = track['artists'][0]['name'] if track['artists'] else 'Desconocido'
-            tracks.append(f"{track['name']} - {artist}")
+        try:
+            results = self.sp.playlist_tracks(playlist_id)
+            while results:
+                for item in results['items']:
+                    track = item['track']
+                    if not track: continue
+                    # Guardar nombre, artista principal e ID
+                    artist = track['artists'][0]['name'] if track['artists'] else 'Desconocido'
+                    tracks.append({
+                        'name': track['name'],
+                        'artist': artist,
+                        'id': track['id'],
+                        'display': f"{track['name']} - {artist}"
+                    })
+                if results['next']:
+                    results = self.sp.next(results)
+                else:
+                    results = None
+        except Exception as e:
+            self.update_status(f"Error al obtener canciones: {e}")
         return tracks
 
     def get_track_count(self, playlist_id):
         try:
-            results = self.sp.playlist_tracks(playlist_id)
+            results = self.sp.playlist_tracks(playlist_id, fields='total')
             return results['total']
         except Exception:
             return 0

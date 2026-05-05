@@ -7,20 +7,24 @@ import json
 import webbrowser
 
 # Cargar CLIENT_ID y CLIENT_SECRET desde un archivo JSON
+CLIENT_ID = None
+CLIENT_SECRET = None
+
 try:
-    with open('credentials.json', 'r') as f:
-        credentials = json.load(f)
-        CLIENT_ID = credentials.get('CLIENT_ID')
-        CLIENT_SECRET = credentials.get('CLIENT_SECRET')
-        
-        if not CLIENT_ID or not CLIENT_SECRET:
-            print("CLIENT_ID o CLIENT_SECRET no se encuentran en el archivo JSON.")
-except FileNotFoundError:
-    print("El archivo credentials.json no se encuentra.")
+    if os.path.exists('credentials.json'):
+        with open('credentials.json', 'r') as f:
+            credentials = json.load(f)
+            CLIENT_ID = credentials.get('CLIENT_ID')
+            CLIENT_SECRET = credentials.get('CLIENT_SECRET')
+            
+            if not CLIENT_ID or not CLIENT_SECRET:
+                print("CLIENT_ID o CLIENT_SECRET no se encuentran en el archivo JSON.")
+    else:
+        print("El archivo credentials.json no se encuentra.")
 except json.JSONDecodeError:
     print("Error al decodificar el archivo JSON. Asegúrate de que el archivo tenga el formato correcto.")
 except Exception as e:
-    print(f"Ocurrió un error inesperado: {e}")
+    print(f"Ocurrió un error inesperado al cargar las credenciales: {e}")
 # Definición de constantes
 REDIRECT_URI = "http://localhost/"
 SCOPE = "playlist-modify-public playlist-modify-private"
@@ -28,6 +32,8 @@ SESSION_FILE = "user_session.json"
 
 class SpotifyAuthenticator:
     def __init__(self):
+        if not CLIENT_ID or not CLIENT_SECRET:
+            raise ValueError("CLIENT_ID and CLIENT_SECRET must be provided in credentials.json")
         self.sp_oauth = SpotifyOAuth(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, 
                                      redirect_uri=REDIRECT_URI, scope=SCOPE)
         self.sp = None
