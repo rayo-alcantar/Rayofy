@@ -1,4 +1,4 @@
-﻿# Importar biblioteca para el portapapeles
+# Importar biblioteca para el portapapeles
 import pyperclip
 
 class PlaylistManager:
@@ -25,9 +25,10 @@ class PlaylistManager:
 
     def extend_playlists(self, results):
         """ Extiende la lista de playlists si hay más páginas """
-        while results['next']:
+        while results and results.get('next'):
             results = self.sp.next(results)
-            self.playlists.extend(results.get('items', []))
+            if results:
+                self.playlists.extend(results.get('items', []))
 
     def get_playlist(self, index):
         """ Obtiene una playlist específica por su índice en la lista """
@@ -41,7 +42,6 @@ class PlaylistManager:
         """ Renombra una playlist """
         try:
             self.sp.playlist_change_details(playlist_id, name=new_name)
-            self.fetch_playlists()
             self.update_status("Playlist renombrada con éxito.")
             return True
         except Exception as e:
@@ -52,7 +52,6 @@ class PlaylistManager:
         """ Elimina una playlist """
         try:
             self.sp.current_user_unfollow_playlist(playlist_id)
-            self.fetch_playlists()
             self.update_status("Playlist eliminada con éxito.")
             return True
         except Exception as e:
@@ -64,18 +63,19 @@ class PlaylistManager:
         try:
             results = self.sp.playlist_tracks(playlist_id)
             while results:
-                for item in results['items']:
-                    track = item['track']
-                    if not track: continue
-                    # Guardar nombre, artista principal e ID
-                    artist = track['artists'][0]['name'] if track['artists'] else 'Desconocido'
+                for item in results.get('items', []):
+                    track = item.get('track')
+                    if not track:
+                        continue
+                    artists = track.get('artists', [])
+                    artist = artists[0]['name'] if artists else 'Desconocido'
                     tracks.append({
-                        'name': track['name'],
+                        'name': track.get('name', 'Desconocido'),
                         'artist': artist,
-                        'id': track['id'],
-                        'display': f"{track['name']} - {artist}"
+                        'id': track.get('id'),
+                        'display': f"{track.get('name', 'Desconocido')} - {artist}"
                     })
-                if results['next']:
+                if results.get('next'):
                     results = self.sp.next(results)
                 else:
                     results = None
@@ -83,10 +83,15 @@ class PlaylistManager:
             self.update_status(f"Error al obtener canciones: {e}")
         return tracks
 
-    def get_track_count(self, playlist_id):
+    def get_track_count(self, playlist_or_id):
+        """ Obtiene el total de canciones leyendo de memoria si es un diccionario o consultando la API como fallback """
+        if isinstance(playlist_or_id, dict):
+            tracks = playlist_or_id.get('tracks', {})
+            if isinstance(tracks, dict) and 'total' in tracks:
+                return tracks['total']
         try:
-            results = self.sp.playlist_tracks(playlist_id, fields='total')
-            return results['total']
+            results = self.sp.playlist_tracks(playlist_or_id, fields='total')
+            return results.get('total', 0)
         except Exception:
             return 0
     
@@ -112,18 +117,26 @@ class PlaylistManager:
             return False
         song_id = None
         results = self.sp.playlist_tracks(playlist_id)
-        for item in results['items']:
-            track = item['track']
-            if f"{track['name']} - {track['artists'][0]['name']}" == song_name:
-                song_id = track['id']
+        while results:
+            for item in results.get('items', []):
+                track = item.get('track')
+                if not track:
+                    continue
+                artists = track.get('artists', [])
+                artist = artists[0]['name'] if artists else 'Desconocido'
+                if f"{track.get('name')} - {artist}" == song_name:
+                    song_id = track.get('id')
+                    break
+            if song_id or not results.get('next'):
                 break
+            results = self.sp.next(results)
+
         if not song_id:
             self.update_status(f"Canción {song_name} no encontrada en la playlist.")
             return False
         try:
             self.sp.playlist_remove_all_occurrences_of_items(playlist_id, [f"spotify:track:{song_id}"])
             self.update_status(f"La canción {song_name} ha sido eliminada de la playlist {playlist_name}.")
-            self.fetch_playlists()
             return True
         except Exception as e:
             self.update_status(f"Error al eliminar la canción de la playlist: {e}")
@@ -140,11 +153,20 @@ class PlaylistManager:
             return False
         song_id = None
         results = self.sp.playlist_tracks(playlist_id)
-        for item in results['items']:
-            track = item['track']
-            if f"{track['name']} - {track['artists'][0]['name']}" == song_name:
-                song_id = track['id']
+        while results:
+            for item in results.get('items', []):
+                track = item.get('track')
+                if not track:
+                    continue
+                artists = track.get('artists', [])
+                artist = artists[0]['name'] if artists else 'Desconocido'
+                if f"{track.get('name')} - {artist}" == song_name:
+                    song_id = track.get('id')
+                    break
+            if song_id or not results.get('next'):
                 break
+            results = self.sp.next(results)
+
         if not song_id:
             self.update_status(f"Canción {song_name} no encontrada en la playlist.")
             return False
@@ -181,3 +203,61 @@ class PlaylistManager:
         except Exception as e:
             self.update_status(f"Error al crear la playlist: {e}")
             return False
+
+    def remove_duplicate_tracks(self, playlist_id):
+        """ Encuentra canciones duplicadas manteniendo la primera ocurrencia y eliminando el resto """
+        seen_uris = set()
+        duplicates_to_remove = []
+
+        try:
+            results = self.sp.playlist_tracks(playlist_id)
+            current_pos = 0
+            while results:
+                for item in results.get('items', []):
+                    track = item.get('track')
+                    if track and track.get('uri'):
+                        uri = track['uri']
+                        if uri in seen_uris:
+                            duplicates_to_remove.append({'uri': uri, 'positions': [current_pos]})
+                        else:
+                            seen_uris.add(uri)
+                    current_pos += 1
+                if results.get('next'):
+                    results = self.sp.next(results)
+                else:
+                    break
+
+            if not duplicates_to_remove:
+                return 0, "No se encontraron canciones duplicadas en esta playlist."
+
+            total_duplicates = len(duplicates_to_remove)
+
+            # Ordenar por posición descendente para que borrar desde el final no altere los índices previos
+            duplicates_to_remove.sort(key=lambda x: x['positions'][0], reverse=True)
+
+            # Lotes de hasta 100 items por llamada (límite de la API de Spotify)
+            batch_size = 100
+            for i in range(0, len(duplicates_to_remove), batch_size):
+                batch = duplicates_to_remove[i:i + batch_size]
+                self.sp.playlist_remove_specific_occurrences_of_items(playlist_id, batch)
+
+            return total_duplicates, f"Se eliminaron {total_duplicates} canciones duplicadas exitosamente."
+        except Exception as e:
+            return -1, f"Error al eliminar duplicados: {e}"
+
+    def copy_track_to_playlist(self, target_playlist_id, track_id):
+        """ Añade una canción existente a otra playlist """
+        try:
+            self.sp.playlist_add_items(target_playlist_id, [f"spotify:track:{track_id}"])
+            return True, "Canción copiada exitosamente."
+        except Exception as e:
+            return False, f"Error al copiar canción: {e}"
+
+    def move_track_to_playlist(self, source_playlist_id, target_playlist_id, track_id):
+        """ Mueve una canción de una playlist a otra """
+        try:
+            self.sp.playlist_add_items(target_playlist_id, [f"spotify:track:{track_id}"])
+            self.sp.playlist_remove_all_occurrences_of_items(source_playlist_id, [f"spotify:track:{track_id}"])
+            return True, "Canción movida exitosamente."
+        except Exception as e:
+            return False, f"Error al mover canción: {e}"
